@@ -7,7 +7,7 @@
                 <v-container fluid fill-height>
                     <v-layout justify-center align-center>
                         <keep-alive>
-                            <router-view></router-view>
+                            <router-view style="width: 100%;"></router-view>
                         </keep-alive>
                     </v-layout>
                 </v-container>
