@@ -1,12 +1,30 @@
 <template>
-        <span class="title">
-          Setting
-        </span>
+    <v-layout row>
+        <v-flex xs8>
+            <v-text-field
+                    label="Time span"
+                    value="20"
+                    suffix="min"
+                    :rules="[numberRule]"
+            ></v-text-field>
+        </v-flex>
+    </v-layout>
 </template>
 
 <script>
   export default {
     name: 'setting',
+    data () {
+      return {
+        numberRule: function (value) {
+          if (Number.isInteger(Number(value))) {
+            console.log('waht??')
+            return true
+          }
+          return 'Time need to be int ;)'
+        }
+      }
+    },
     components: {},
     methods: {}
   }
