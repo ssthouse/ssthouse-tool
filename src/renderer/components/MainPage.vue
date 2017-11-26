@@ -1,8 +1,5 @@
 <template>
     <v-layout row>
-        <!--<v-flex lg-6 offset-lg-3>-->
-        <!--Main page-->
-        <!--</v-flex>-->
         <v-flex lg6 sm6 xs-6>
             <v-card>
                 <v-card-media src="static/coldplay_demo.jpg" height="300px">
@@ -20,6 +17,10 @@
                 </v-card-actions>
             </v-card>
         </v-flex>
+        <v-flex>
+            <span>{{timeSpan}}</span>
+
+        </v-flex>
     </v-layout>
 </template>
 
@@ -27,6 +28,11 @@
   import * as EventBus from '../eventbus/EventBus'
 
   export default {
+    data () {
+      return {
+        timeSpan: this.$store.state.Setting.timeSpan
+      }
+    },
     name: 'landing-page',
     components: {},
     methods: {

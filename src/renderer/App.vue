@@ -123,6 +123,7 @@
 
 <script>
   import * as EventBus from './eventbus/EventBus'
+  import * as Types from './store/types'
   import {Howl} from 'howler'
 
   export default {
@@ -131,6 +132,7 @@
       dialog: false,
       drawer: null,
       music: null,
+      timeSchedule: null,
       items: [
         {icon: 'contacts', text: 'Main Page', linkTo: 'mainPage'},
         {icon: 'history', text: 'Music List', linkTo: 'musicList'},
@@ -143,6 +145,18 @@
       },
       onMusicClockStart () {
         this.music.play()
+      },
+      initListener () {
+        // listen to music control event
+        EventBus.instance.$on(EventBus.MUSIC_PAUSE, () => {
+          this.music.pause()
+        })
+        EventBus.instance.$on(EventBus.MUSIC_RESUME, () => {
+          if (this.music.playing()) {
+            return
+          }
+          this.music.play()
+        })
       }
     },
     props: {
@@ -151,23 +165,14 @@
     created: function () {
       this.$router.push('mainPage')
       EventBus.instance.$on(EventBus.TIME_SPAN_CHANGE, (value) => {
-        console.log('change time span to' + value)
+        this.$store.commit(Types.UPDATE_TIME_SPAN, value)
       })
       // try play music
       // var demoMusicPath = require('path').resolve('static', 'music', 'Yellow.mp3')
       this.music = new Howl({
         src: ['static/music/Yellow.mp3']
       })
-      // listen to music control event
-      EventBus.instance.$on(EventBus.MUSIC_PAUSE, () => {
-        this.music.pause()
-      })
-      EventBus.instance.$on(EventBus.MUSIC_RESUME, () => {
-        if (this.music.playing()) {
-          return
-        }
-        this.music.play()
-      })
+      this.initListener()
     }
   }
 </script>
