@@ -17,10 +17,6 @@
                 </v-card-actions>
             </v-card>
         </v-flex>
-        <v-flex>
-            <span>{{timeSpan}}</span>
-
-        </v-flex>
     </v-layout>
 </template>
 

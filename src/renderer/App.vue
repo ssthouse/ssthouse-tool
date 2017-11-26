@@ -21,8 +21,8 @@
                     color="pink"
                     dark
                     fixed
-                    @click.stop="onMusicClockStart">
-                <v-icon>play_arrow</v-icon>
+                    @click.stop="onMusicClockFabClick">
+                <v-icon ref="fabIcon">play_arrow</v-icon>
             </v-btn>
 
             <!--drawer-->
@@ -112,9 +112,10 @@
                     <v-btn icon>
                         <v-icon>apps</v-icon>
                     </v-btn>
-                    <v-btn icon>
-                        <v-icon>play_arrow</v-icon>
-                    </v-btn>
+                    <v-chip disabled color="pink" text-color="white" class="top-count-down">
+                        <v-icon left>alarm</v-icon>
+                        <span class="count-time-label">{{countDown.currentCountDownLabel}}</span>
+                    </v-chip>
                 </div>
             </v-toolbar>
         </v-app>
@@ -128,35 +129,89 @@
 
   export default {
     name: 'ssthouse-tool',
-    data: () => ({
-      dialog: false,
-      drawer: null,
-      music: null,
-      timeSchedule: null,
-      items: [
-        {icon: 'contacts', text: 'Main Page', linkTo: 'mainPage'},
-        {icon: 'history', text: 'Music List', linkTo: 'musicList'},
-        {icon: 'content_copy', text: 'Setting', linkTo: 'setting'}
-      ]
-    }),
+    data () {
+      return {
+        dialog: false,
+        drawer: null,
+        music: null,
+        countDown: {
+          running: false,
+          startTime: null,
+          currentCountDownLabel: this.getCountDownLabel(this.$store.state.Setting.timeSpan * 60)
+        },
+        countDownHandler: null,
+        timeSchedule: null,
+        items: [
+          {icon: 'contacts', text: 'Main Page', linkTo: 'mainPage'},
+          {icon: 'history', text: 'Music List', linkTo: 'musicList'},
+          {icon: 'content_copy', text: 'Setting', linkTo: 'setting'}
+        ]
+      }
+    },
     methods: {
       onDrawerItemClicked (linkTo) {
         this.$router.push(linkTo)
       },
-      onMusicClockStart () {
-        this.music.play()
+      onMusicClockFabClick () {
+        // this.music.play()
+        if (this.countDown.running) {
+          this.endCountDown()
+        } else {
+          this.startCountDown()
+        }
       },
       initListener () {
+        var self = this
         // listen to music control event
         EventBus.instance.$on(EventBus.MUSIC_PAUSE, () => {
-          this.music.pause()
+          self.music.pause()
         })
         EventBus.instance.$on(EventBus.MUSIC_RESUME, () => {
-          if (this.music.playing()) {
+          if (self.music.playing()) {
             return
           }
-          this.music.play()
+          self.music.play()
         })
+        EventBus.instance.$on(EventBus.TIME_SPAN_CHANGE, (value) => {
+          if (this.countDown.running !== true) {
+            this.countDown.currentCountDownLabel = this.getCountDownLabel(value * 60)
+          }
+        })
+      },
+      initFabListener () {
+        EventBus.instance.$on(EventBus)
+      },
+      getCountDownLabel (secondNum) {
+        var minuteNum = Number.parseInt(secondNum / 60)
+        var second = Number.parseInt(secondNum % 60)
+        var secondStr = second >= 10 ? second : '0' + second
+        return minuteNum + ':' + secondStr
+      },
+      startCountDown () {
+        var self = this
+        this.$refs.fabIcon.textContent = 'pause'
+        var startTime = new Date()
+        this.countDown.running = true
+        this.countDown.startTime = startTime
+        this.countDownHandler = setInterval(() => {
+          var curDate = new Date()
+          var secondPassNum = Math.floor((curDate - this.countDown.startTime) / 1000)
+          var leftSecNum = this.$store.state.Setting.timeSpan * 60 - secondPassNum
+          self.countDown.currentCountDownLabel = this.getCountDownLabel(leftSecNum)
+
+          // when time is over
+          if (leftSecNum === 0) {
+            this.music.play()
+            this.endCountDown()
+          }
+        }, 1000)
+      },
+      endCountDown () {
+        // TODO for now: restore count down
+        clearInterval(this.countDownHandler)
+        this.$refs.fabIcon.textContent = 'play_arrow'
+        this.countDown.running = false
+        this.countDown.currentCountDownLabel = this.getCountDownLabel(this.$store.state.Setting.timeSpan * 60)
       }
     },
     props: {
@@ -177,6 +232,14 @@
   }
 </script>
 
-<style>
+<style lang="less">
     /* CSS */
+    .top-count-down {
+        padding-left: 8px;
+        padding-right: 8px;
+
+        .count-time-label {
+            font-size: larger;
+        }
+    }
 </style>

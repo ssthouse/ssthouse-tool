@@ -3,22 +3,24 @@
         <v-flex xs8>
             <v-text-field
                     @change="onTimeSpanChange"
+                    :value="timeSpan"
                     label="Time span"
-                    value="20"
                     suffix="min"
-                    :rules="[numberRule]"
-            ></v-text-field>
+                    :rules="[numberRule]">
+            </v-text-field>
         </v-flex>
     </v-layout>
 </template>
 
 <script>
   import * as EventBus from '../eventbus/EventBus'
+  import * as Types from '../store/types'
 
   export default {
     name: 'setting',
     data () {
       return {
+        timeSpan: this.$store.state.Setting.timeSpan,
         numberRule: function (value) {
           if (Number.isInteger(Number(value))) {
             return true
@@ -31,6 +33,7 @@
     methods: {
       onTimeSpanChange (value) {
         EventBus.instance.$emit(EventBus.TIME_SPAN_CHANGE, value)
+        this.$store.commit(Types.UPDATE_TIME_SPAN, value)
       }
     }
   }

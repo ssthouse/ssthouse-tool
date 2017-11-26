@@ -6,6 +6,7 @@ const state = {
 
 const mutations = {
   [Types.UPDATE_TIME_SPAN]: function (state, timeSpan) {
+    timeSpan = Number.parseInt(timeSpan)
     if (Number.isInteger(timeSpan)) {
       state.timeSpan = timeSpan
     }
