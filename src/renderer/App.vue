@@ -21,7 +21,7 @@
                     color="pink"
                     dark
                     fixed
-                    @click.stop="dialog = !dialog">
+                    @click.stop="onMusicClockStart">
                 <v-icon>play_arrow</v-icon>
             </v-btn>
 
@@ -122,11 +122,15 @@
 </template>
 
 <script>
+  import * as EventBus from './eventbus/EventBus'
+  import {Howl} from 'howler'
+
   export default {
     name: 'ssthouse-tool',
     data: () => ({
       dialog: false,
       drawer: null,
+      music: null,
       items: [
         {icon: 'contacts', text: 'Main Page', linkTo: 'mainPage'},
         {icon: 'history', text: 'Music List', linkTo: 'musicList'},
@@ -136,6 +140,9 @@
     methods: {
       onDrawerItemClicked (linkTo) {
         this.$router.push(linkTo)
+      },
+      onMusicClockStart () {
+        this.music.play()
       }
     },
     props: {
@@ -143,6 +150,24 @@
     },
     created: function () {
       this.$router.push('mainPage')
+      EventBus.instance.$on(EventBus.TIME_SPAN_CHANGE, (value) => {
+        console.log('change time span to' + value)
+      })
+      // try play music
+      // var demoMusicPath = require('path').resolve('static', 'music', 'Yellow.mp3')
+      this.music = new Howl({
+        src: ['static/music/Yellow.mp3']
+      })
+      // listen to music control event
+      EventBus.instance.$on(EventBus.MUSIC_PAUSE, () => {
+        this.music.pause()
+      })
+      EventBus.instance.$on(EventBus.MUSIC_RESUME, () => {
+        if (this.music.playing()) {
+          return
+        }
+        this.music.play()
+      })
     }
   }
 </script>

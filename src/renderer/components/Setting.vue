@@ -2,6 +2,7 @@
     <v-layout row>
         <v-flex xs8>
             <v-text-field
+                    @change="onTimeSpanChange"
                     label="Time span"
                     value="20"
                     suffix="min"
@@ -12,13 +13,14 @@
 </template>
 
 <script>
+  import * as EventBus from '../eventbus/EventBus'
+
   export default {
     name: 'setting',
     data () {
       return {
         numberRule: function (value) {
           if (Number.isInteger(Number(value))) {
-            console.log('waht??')
             return true
           }
           return 'Time need to be int ;)'
@@ -26,7 +28,11 @@
       }
     },
     components: {},
-    methods: {}
+    methods: {
+      onTimeSpanChange (value) {
+        EventBus.instance.$emit(EventBus.TIME_SPAN_CHANGE, value)
+      }
+    }
   }
 </script>
 

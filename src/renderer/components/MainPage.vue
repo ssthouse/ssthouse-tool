@@ -1,7 +1,7 @@
 <template>
     <v-layout row>
         <!--<v-flex lg-6 offset-lg-3>-->
-            <!--Main page-->
+        <!--Main page-->
         <!--</v-flex>-->
         <v-flex lg6 sm6 xs-6>
             <v-card>
@@ -10,12 +10,13 @@
                 <v-card-title primary-title>
                     <div>
                         <h3 class="headline mb-0">Kangaroo Valley Safari</h3>
-                        <div>Located two hours south of Sydney in the <br>Southern Highlands of New South Wales, ...</div>
+                        <div>Located two hours south of Sydney in the <br>Southern Highlands of New South Wales, ...
+                        </div>
                     </div>
                 </v-card-title>
                 <v-card-actions>
-                    <v-btn flat color="blue">Share</v-btn>
-                    <v-btn flat color="blue">Explore</v-btn>
+                    <v-btn flat color="blue" @click="onMusicPauseClick">Pause</v-btn>
+                    <v-btn flat color="blue" @click="onMusicResumeClick">Resume</v-btn>
                 </v-card-actions>
             </v-card>
         </v-flex>
@@ -23,12 +24,20 @@
 </template>
 
 <script>
+  import * as EventBus from '../eventbus/EventBus'
+
   export default {
     name: 'landing-page',
     components: {},
     methods: {
       open (link) {
         this.$electron.shell.openExternal(link)
+      },
+      onMusicPauseClick () {
+        EventBus.instance.$emit(EventBus.MUSIC_PAUSE)
+      },
+      onMusicResumeClick () {
+        EventBus.instance.$emit(EventBus.MUSIC_RESUME)
       }
     }
   }
