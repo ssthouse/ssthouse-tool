@@ -1,4 +1,5 @@
 import * as Types from '../types'
+const settings = require('electron-settings')
 
 const state = {
   timeSpan: 20
@@ -9,6 +10,7 @@ const mutations = {
     timeSpan = Number.parseInt(timeSpan)
     if (Number.isInteger(timeSpan)) {
       state.timeSpan = timeSpan
+      settings.set('timeSpan', timeSpan)
     }
   }
 }

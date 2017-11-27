@@ -126,6 +126,7 @@
   import * as EventBus from './eventbus/EventBus'
   import * as Types from './store/types'
   import {Howl} from 'howler'
+  const settings = require('electron-settings')
 
   export default {
     name: 'ssthouse-tool',
@@ -157,6 +158,7 @@
         if (this.countDown.running) {
           this.endCountDown()
         } else {
+          this.randomOneSong()
           this.startCountDown()
         }
       },
@@ -188,7 +190,9 @@
         return minuteNum + ':' + secondStr
       },
       startCountDown () {
-        var self = this
+        if (this.music.playing()) {
+          this.music.stop()
+        }
         this.$refs.fabIcon.textContent = 'pause'
         var startTime = new Date()
         this.countDown.running = true
@@ -197,21 +201,43 @@
           var curDate = new Date()
           var secondPassNum = Math.floor((curDate - this.countDown.startTime) / 1000)
           var leftSecNum = this.$store.state.Setting.timeSpan * 60 - secondPassNum
-          self.countDown.currentCountDownLabel = this.getCountDownLabel(leftSecNum)
-
+          this.countDown.currentCountDownLabel = this.getCountDownLabel(leftSecNum)
           // when time is over
           if (leftSecNum === 0) {
+            // show notify
+            var notifyOpt = {
+              title: 'Time to have a rest 🤘',
+              body: 'Take care of yourself (●￣(ｴ)￣●)',
+              icon: require('path').resolve('static', 'logo.png')
+            }
+            var notify = new Notification(notifyOpt.title, notifyOpt)
+            console.log(notify)
             this.music.play()
             this.endCountDown()
           }
         }, 1000)
       },
+      randomOneSong () {
+        var fs = require('fs')
+        var path = require('path')
+        fs.readdir(path.resolve('static', 'music'), (err, files) => {
+          if (err) {
+            alert(err)
+          }
+          var totalNum = files.length
+          var randSongIndex = Math.floor(Math.random() * totalNum)
+          var randomSongName = 'static/music/' + files[randSongIndex]
+          this.music = new Howl({
+            src: [randomSongName]
+          })
+        })
+      },
       endCountDown () {
         // TODO for now: restore count down
         clearInterval(this.countDownHandler)
-        this.$refs.fabIcon.textContent = 'play_arrow'
         this.countDown.running = false
         this.countDown.currentCountDownLabel = this.getCountDownLabel(this.$store.state.Setting.timeSpan * 60)
+        this.$refs.fabIcon.textContent = 'play_arrow'
       }
     },
     props: {
@@ -228,6 +254,11 @@
         src: ['static/music/Yellow.mp3']
       })
       this.initListener()
+      // init setting
+      if (settings.has('timeSpan') !== true) {
+        return
+      }
+      EventBus.instance.$emit(EventBus.TIME_SPAN_CHANGE, settings.get('timeSpan'))
     }
   }
 </script>
